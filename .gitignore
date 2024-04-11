@@ -1,0 +1,16 @@
+.DS_Store
+.idea
+.vscode
+*.vcd
+runs
+tt_submission
+src/user_config.tcl
+test/sim_build
+test/__pycache__/
+test/results.xml
+test/gate_level_netlist.v
+project/
+src/ChiselTop.anno.json
+src/ChiselTop.fir
+src/ChiselTop.v
+target/
