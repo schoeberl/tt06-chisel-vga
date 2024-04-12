@@ -22,7 +22,7 @@ class ChiselTop() extends Module {
   val add = WireDefault(0.U(7.W))
   add := io.ui_in + io.uio_in
 
-  // Blink with 1 Hz, juast to show that the design is running
+  // Blink with 1 Hz, to show that the design is running
   val cntReg = RegInit(0.U(32.W))
   val ledReg = RegInit(0.U(1.W))
   cntReg := cntReg + 1.U
@@ -31,9 +31,6 @@ class ChiselTop() extends Module {
     ledReg := ~ledReg
   }
   io.uo_out := ledReg ## add
-
-  val xReg = RegInit(0.U(32.W))
-  val yReg = RegInit(0.U(32.W))
 
   val hSync = WireDefault(false.B)
   val vSync = WireDefault(false.B)
@@ -76,20 +73,13 @@ Whole frame	525	16.683217477656
   val V_FRONT_PORCH = 10
   val YMAX = V_SYNC + V_BACK_PORCH + VISIBLE_LINES + V_FRONT_PORCH
 
-  val xDone = xReg === (XMAX - 1).U
-  val yDone = yReg === (YMAX - 1).U && xDone
-  xReg := Mux(xDone, 0.U, xReg + 1.U)
-  yReg := Mux(xDone, Mux(yDone, 0.U, yReg + 1.U), yReg)
+  val (x, xDone) = Counter(true.B, XMAX-1)
+  val (y, yDone) = Counter(xDone, YMAX-1)
 
-  /*
-  val (x, wrap) = Counter(true.B, XMAX-1)
-   */
-
-  hSync := xReg >= 0.U && xReg < H_SYNC.U
-  vSync := yReg >= 0.U && yReg < V_SYNC.U
-
-  // Dummy display
-  on := xReg >= 600.U&& xReg < 700.U && yReg >= 200.U && yReg < 300.U
+  hSync := x >= 0.U && x < H_SYNC.U
+  vSync := y >= 0.U && y < V_SYNC.U
+  // Just a rectangle in the middle of the screen
+  on := x >= 800.U&& x < 1200.U && y >= 200.U && y < 300.U
 
   io.uo_out := Cat(hSync, on, on, on, vSync, on, on, ledReg)
   io.uio_oe := 0.U
